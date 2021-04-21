@@ -1,0 +1,25 @@
+{
+  "name": "phonebook-backend-full-stack",
+  "version": "1.0.0",
+  "engines": {
+    "node": "12.x",
+    "npm": "7.x"
+  },
+  "description": "This is a server for notes app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Miguel Atencio",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
