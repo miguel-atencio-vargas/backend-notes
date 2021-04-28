@@ -22,6 +22,14 @@ const requestLogger = (req, res, next) => {
 app.use(requestLogger);
 
 
+app.get('/info', (req, res, next) => {
+  Note.countDocuments({})
+    .then(totalNotes => {
+      res.send({'Quantity in notes': totalNotes});
+    })
+    .catch(err => next(err));
+});
+
 app.get('/api/notes', (req, res) => {
   Note.find({}).then(notes => {
     res.json(notes);
@@ -46,17 +54,16 @@ app.delete('/api/notes/:id', (req, res, next) => {
     .catch(err => next(err))
 });
 
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes', (req, res, next) => {
   const body = req.body;
-  if (!body.content) return res.status(400).json({
-    error: 'content missing'
-  });
   const note = new Note({
     content: body.content,
     important: body.important || false,
     date: new Date()
   });
-  note.save().then(savedNote => res.json(savedNote));
+  note.save()
+    .then(savedNote => res.json(savedNote))
+    .catch(err => next(err));
 });
 
 app.put('/api/notes/:id', (req, res, next) => {
@@ -77,12 +84,13 @@ const unknownEndpoint = (req, res) => {
 }
 app.use(unknownEndpoint);
 
-const errorHandler = (error, req, res, next) => {
-  console.log(error);
-  if(error.name === 'CastError') return res.status(400).send({ 
-    message: 'Malformatted ID'
-  });
-  next(error);
+const errorHandler = (exception, req, res, next) => {
+  console.log(exception);
+  let error;
+  if(exception.name === 'CastError') error = 'Malformatted ID'; 
+  if(exception.name === 'ValidationError') error = exception.message;
+  if(error) return res.status(400).send({ error });
+  next(exception);
 }
 app.use(errorHandler);
 
