@@ -30,7 +30,6 @@ app.get('/info', (req, res, next) => {
 
 app.get('/api/notes', (req, res, next) => {
   Note.find({})
-    .then(notes => notes.toJSON())
     .then(notes => res.json(notes))
     .catch(err => next(err));
 });
