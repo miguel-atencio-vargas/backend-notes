@@ -24,16 +24,15 @@ app.use(requestLogger);
 
 app.get('/info', (req, res, next) => {
   Note.countDocuments({})
-    .then(totalNotes => {
-      res.send({'Quantity in notes': totalNotes});
-    })
+    .then(totalNotes => res.send({'Quantity in notes': totalNotes}))
     .catch(err => next(err));
 });
 
-app.get('/api/notes', (req, res) => {
-  Note.find({}).then(notes => {
-    res.json(notes);
-  });
+app.get('/api/notes', (req, res, next) => {
+  Note.find({})
+    .then(notes => notes.toJSON())
+    .then(notes => res.json(notes))
+    .catch(err => next(err));
 });
 
 app.get('/api/notes/:id', (req, res, next) => {
@@ -51,7 +50,7 @@ app.delete('/api/notes/:id', (req, res, next) => {
       if(!result) return res.status(404).send({message: 'ID not found'});
       res.status(204).end();
     })
-    .catch(err => next(err))
+    .catch(err => next(err));
 });
 
 app.post('/api/notes', (req, res, next) => {
@@ -62,7 +61,8 @@ app.post('/api/notes', (req, res, next) => {
     date: new Date()
   });
   note.save()
-    .then(savedNote => res.json(savedNote))
+    .then(savedNote => savedNote.toJSON())
+    .then(savedAndFormattedNote => res.json(savedAndFormattedNote))
     .catch(err => next(err));
 });
 
@@ -73,9 +73,8 @@ app.put('/api/notes/:id', (req, res, next) => {
     important: body.important
   }
   Note.findByIdAndUpdate(req.params.id, note, {new: true})
-    .then( updatedNote => {
-      res.json(updatedNote)
-    })
+    .then(updatedNote => updatedNote.toJSON())
+    .then(updatedAndFormattedNote => res.json(updatedAndFormattedNote))
     .catch(err => next(err));
 });
 
@@ -95,6 +94,6 @@ const errorHandler = (exception, req, res, next) => {
 app.use(errorHandler);
 
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log('Server listen on:', PORT));
 
