@@ -9,16 +9,18 @@ const middleware = require('./utils/middleware');
 const notesRouter = require('./controllers/note');
 
 
-const MONGODB_URI = config.MONGODB_URI;
-logger.info('connecting to', MONGODB_URI.substr(0, 28));
+logger.info('connecting to', config.MONGODB_URI);
 
-mongoose.connect(MONGODB_URI, {
+mongoose.connect(config.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
   useCreateIndex: true
 })
-  .then(() => logger.info('Connected to MongoDB'))
+  .then((_) => {
+    const uri = _.connections[0]._connectionString;
+    logger.info('Connected to:', uri);
+  })
   .catch((error) => logger.info('Error connecting to MongoDB:', error.message));
 
 
