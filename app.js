@@ -1,15 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+require('express-async-errors');
 const app = express();
 
 const config = require('./utils/config');
 const logger = require('./utils/logger');
 const middleware = require('./utils/middleware');
 const notesRouter = require('./controllers/note');
-
-
-logger.info('connecting to', config.MONGODB_URI);
 
 mongoose.connect(config.MONGODB_URI, {
   useNewUrlParser: true,

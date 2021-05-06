@@ -1,7 +1,7 @@
 
 const palindrome = require('../utils/for_testing').palindrome;
 
-describe.skip('Palindrome', () => {
+describe('Palindrome', () => {
   test('of a', () => {
     const result = palindrome('a');
     expect(result).toBe('a');
