@@ -18,6 +18,7 @@
     "test": "NODE_ENV=test jest --verbose --runInBand",
     "test:silent": "npm run test -- --silent",
     "test:watch": "npm run test -- --watch",
+    "test:watch:silent": "npm run test:watch -- --silent",
     "debugger": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "author": "Miguel Atencio",
