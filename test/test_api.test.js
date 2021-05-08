@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
 const supertest = require('supertest');
-const app = require('../app');
+const bcrypt = require('bcrypt');
+
 const Note = require('../models/note');
+const User = require('../models/user');
+const app = require('../app');
+
 const api = supertest(app);
 
 
@@ -88,7 +92,7 @@ describe('addition of a new note', () => {
 });
 
 describe('deletion of a note', () => {
-  test('succeed with status 204 if id is not valid', async () => {
+  test('succeed with status 204 if id is valid', async () => {
     const notesAtStart = await helper.notesInDB();
     const noteToDelete = notesAtStart[0];
     await api
@@ -100,6 +104,46 @@ describe('deletion of a note', () => {
     );
     const contents = notesAtEnd.map(r => r.content);
     expect(contents).not.toContain(noteToDelete.content);
+  });
+});
+
+describe('when there is initially one user in DB', () => {
+  beforeEach(async() => {
+    await User.deleteMany({});
+    const passwordHash =  await bcrypt.hash('zekret', 10);
+    const user = new User({ username: 'root', passwordHash });
+    await user.save();
+  });
+
+  test('creation succeeds with fresh username', async() => {
+    const usersAtStart = await helper.usersInDB();
+    const newUser = {
+      username: 'luka',
+      name: 'Luka Ferreira',
+      password: 'saleinen'
+    };
+    await api.post('/api/users').send(newUser)
+      .expect(200).expect('Content-Type', /application\/json/);
+    const usersAtEnd = await helper.usersInDB();
+    expect(usersAtEnd).toHaveLength(usersAtStart.length + 1);
+
+    const usernames = usersAtEnd.map(user => user.username);
+    expect(usernames).toContain(newUser.username);
+  });
+
+  test('creation fails with proper statuscode and message if username already taken', async() => {
+    const usersAtStart =  await helper.usersInDB();
+    const newUser = {
+      username: 'root',
+      name: 'Super User',
+      password: 'pass'
+    };
+    const result = await api.post('/api/users').send(newUser)
+      .expect(400).expect('Content-Type', /application\/json/);
+
+    expect(result.body.error).toContain('`username` to be unique');
+    const usersAtEnd =  await helper.usersInDB();
+    expect(usersAtEnd).toHaveLength(usersAtStart.length);
   });
 });
 
