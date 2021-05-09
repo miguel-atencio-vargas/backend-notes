@@ -3,8 +3,8 @@ const logger = require('../utils/logger');
 
 const requestLogger = (req, res, next) => {
   logger.info('Method:', req.method);
-  logger.info('Path:  ', req.path);
-  logger.info('Body:  ', req.body);
+  logger.info('Path:', req.path);
+  logger.info('Body:', req.body);
   logger.info('---');
   next();
 };
@@ -12,9 +12,14 @@ const requestLogger = (req, res, next) => {
 const errorHandler = (exception, req, res, next) => {
   logger.error(exception);
   let error;
+  let code = 400;
   if(exception.name === 'CastError') error = 'Malformatted ID';
   if(exception.name === 'ValidationError') error = exception.message;
-  if(error) return res.status(400).send({ error });
+  if (exception.name === 'JsonWebTokenError') {
+    error = 'Invalid token';
+    code = 401;
+  }
+  if(error) return res.status(code).send({ error });
   next(exception);
 };
 
