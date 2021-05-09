@@ -1,7 +1,9 @@
 'use strict';
 const notesRouter = require('express').Router();
 const Note = require('../models/note');
+const User = require('../models/user');
 //const logger = require('../utils/logger');
+
 
 notesRouter.get('/info', async(req, res) => {
   const totalNotes = await Note.countDocuments({});
@@ -9,7 +11,10 @@ notesRouter.get('/info', async(req, res) => {
 });
 
 notesRouter.get('/', async(req, res) => {
-  const notes = await Note.find({});
+  const notes = await Note.find({}).populate('user', {
+    username: 1,
+    name: 1
+  });
   res.json(notes);
 });
 
@@ -26,12 +31,16 @@ notesRouter.delete('/:id', async(req, res) => {
 
 notesRouter.post('/', async(req, res) => {
   const body = req.body;
+  const user = await User.findById(body.userID);
   const note = new Note({
     content: body.content,
     important: body.important || false,
-    date: new Date()
+    date: new Date(),
+    user: user._id
   });
   const savedNote = await note.save();
+  user.notes = user.notes.concat(savedNote._id);
+  await user.save();
   res.json(savedNote);
 });
 

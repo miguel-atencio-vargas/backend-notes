@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 
+
 const userSchema =  new mongoose.Schema({
   username: {
     type: String,
     unique: true,
-    minlength: 6,
+    minlength: 4,
     match: /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/igm
   },
   name: String,
